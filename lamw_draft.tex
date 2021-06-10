@@ -1,0 +1,58 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{amsmath}
+
+%why am I writing? or what do i want readers to get out of reading this post? 
+%i want them to use the lamw data transform to work with non-normal observations
+%
+%who is the reader?
+%general STAN user, assume some stats-background, people thinking about model assumptions, but working at lower model-complexity
+%
+%what is the format/media?
+%text of about 800 words, 9=2+3+4 paragraphs, 3 figures. 
+%- sections are 
+%  1. [global overview: intro, foreword]
+%  2. [non-normal observations: heavy-tailed simulated Cauchy hypothesis testing problem, details of heuristic, intro Tukey h]
+%  3. [lambertW way as a general tool for non-normal obs.: summary, Tukey-h, lambW  workflow, shortcomings]
+% 
+%- lambertW way as a general tool for non-normal observations
+% - lambert-W transform workflow (replace tukey-h with abstract F_x observational distro)
+%   - this section will be the most abstract/technical
+% - shortcomings/perspectives:
+%   - need to test for normality/appropriateness of transform
+%   - transforming data makes thinking about prior and running model checks trickier
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1ex}
+
+\begin{document}
+
+% Why: Context, Need, Task, Object
+
+The real-world often generates observations that are inconsistent with the normal distribution. The data might appear asymmetric around a central value as opposed to bell-shaped. It might also contain many statistically-interesting extreme values that would be discounted if we assume normality. Faced with this problem, we could either ignore the abnormalities or choose another distribution. The second of these approaches is perfectly valid if we're able to pay the increased complexity and computation costs. With another distribution, we need to ensure that that any procedure over posterior samples does not implicitly assume normality. Alternatively, we could assume that the observations are at their core normally-distributed, but that before they reach us, they are transformed in such a way as to exhibit skewness or heavier tails. In this post, we show how to implement such transforms using the theory of LambertW random variables originally developed by GM Goerg.
+
+% What: Findings, conclusions perspectives
+
+Using the eponymous R package, we demonstrate how LambertW transforms apply to location-hypothesis testing over Cauchy data. When we apply it to almost-normal simulated data, we show its advantages over switching distribution-families. To simplify matters, we have only described the case of heavy-tailed probabilistic systems driven by Gaussian random variables. However, the LambertW way has many other advantages: we can assume non-Gaussian latent input and skewed data out-of-box. Because Stan allows us to sample from arbitrary distributions, we anticipate that Lambert-W transforms would naturally fit into many workflows.
+
+\section{}
+
+The Cauchy distribution is famously heavy-tailed. With an undefined mean and variance, many common statistical techniques, such as the Student's t-test, do not apply. How would one test a hypothesis about the location of the Cauchy distribution? Drawing on robust statistics, we could first estimate the location and scale using the median and inter-quartile range (75\% - 25\% percentiles) respectively, then run a Student's t-test on the centered and rescaled samples. While this procedure works in a simulated setting, it is entirely heuristic.
+
+Putting some details in the experiment above: Suppose $X \sim \mathcal{C}(x_0 =0,\gamma=1)$ is a Cauchy distributed random variable and we observe $100$ simulated-samples. We want to test the hypothesis $H_0: x_0 = 0$ vs. $H_1: x_0 \neq 0$. Using R, we come up with an estimate of $x_0 = -0.13$ and $\gamma=1.8$, which gives a t-stat of $-0.72$, which is insufficient to reject $H_0$.
+
+While the above analysis indicates that our immediate problem is solved (deciding whether the location of the observations is 0 or otherwise), its not very insightful. We don't learn much. What if instead, we assume our Cauchy simulated-data comes from a bijective-function with a ``tail-heavyness'' parameter powered by a normal random number generator? Tukey's h random variables provide such functions where $Y = U\exp\{\frac{\delta}{2}U^2\}$ for $U\sim \mathcal{N}(0,1)$ and $\delta \geq 0$. When we set $\delta > 0$, we create heavy tails as observations away from the mean are dispersed further. If $Y^{-1}$ is well-defined, we can take our Cauchy observations and convert them to standard normal and run a hypothesis test as before (Incidentally: the t-stat in this case turns out to be $-0.40$). With $\hat{\delta} = 1.1$, we also get an estimate of how heavy-tailed our data is and a pre-parameterized transform $Y^{-1}(\cdot \mid \hat{\delta})$ for the next sample.
+
+\section{}
+
+
+(Draft) The Tukey's h random variable $Y$ follows the LambertW$ \times F_U$ for $F_U \sim \mathcal{N}(0,1)$. We would choose $F_U$ as the distribution we're more familiar with or easier to work with (other choices are $\chi^2, \Gamma, \mathcal{U}$). If we model the data as  LambertW$ \times \mathcal{N}(0,1)$ (Tukey's h), we normalize the data while accounting for heavy tails. The LambertW function is involved in defining the inverse transform $Y^{-1}$, which takes us from observed data to the normal distribution.
+
+(Draft) lambw in a linear model on windspeed data vs. normal 
+
+(Draft) bayesian workflow changes when working with lambw (testing for normality, checking prior, running model checks)
+
+\end{document}
