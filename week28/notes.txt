@@ -4,6 +4,8 @@ Do SBC on normal MLE
 Plan out API 
 Figure out why MLE doesn't work for t-dist / exponential
 Draft blog post with Normal MLE with SBC
+Look at Gaussianize, where is mean/var coming from for cauchy 1
+Figure out examples of LambertW x Exp
 
 Progress
 
