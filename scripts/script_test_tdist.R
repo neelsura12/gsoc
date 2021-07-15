@@ -1,6 +1,5 @@
 library(cmdstanr)
-set_cmdstan_path("/Users/nshah/cmdstan")
-fp <- file.path("/Users/nshah/Documents/GitHub/scratch/models/lamw_tdist.stan")
+fp <- file.path("/Users/nshah/work/gsoc/models/lamw_tdist.stan")
 
 # ------------------
 
@@ -27,7 +26,7 @@ mod_out <- mod$sample(
 
 mod_out$summary()
 
-#  ------------------
+# ------------------
 
 yy <- LambertW::rLambertW(N, distname="t", theta=list(beta=c(location=mu, scale=sigma, df=nu), delta=delta))
 LambertW::MLE_LambertW(yy, distname="t", type="h", theta.fixed=list(beta=c(location=mu, scale=sigma, df=nu), alpha=1))
