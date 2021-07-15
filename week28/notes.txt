@@ -8,7 +8,16 @@ Draft blog post with Normal MLE with SBC
 Progress
 
 t-dist and exponential MLE don't return correct inference even if we fix loc, scale, df parameters (only infer delta)
-The t-dist inference is good when nu is higher (as nu gets larger, t- becomes more normal)
+The t-dist inference is good when nu is higher (as nu gets larger, t- becomes more normal).
+
+Exponential distribution seems to struggle as well, possible due to x negative or close to 0.
+
+
+https://mc-stan.org/docs/2_23/stan-users-guide/sbc-in-stan.html
+https://mc-stan.org/rstan/reference/sbc.html
+https://arxiv.org/abs/1804.06788
+https://github.com/hyunjimoon/SBC
+https://discourse.mc-stan.org/t/sbc-stanconnect-2021/21798/10?u=spinkney
 
 
 

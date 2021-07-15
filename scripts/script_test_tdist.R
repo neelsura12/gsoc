@@ -1,11 +1,11 @@
 library(cmdstanr)
-fp <- file.path("/Users/nshah/work/gsoc/models/lamw_tdist2.stan")
+fp <- file.path("/Users/nshah/work/gsoc/models/lamw_tdist.stan")
 
 # ------------------
 
 N <- 1000
 mu <- 4
-nu <- 1000
+nu <- 10
 sigma <- sqrt(nu/(nu - 2))
 delta <- 1
 
