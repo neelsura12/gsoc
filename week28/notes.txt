@@ -1,0 +1,14 @@
+Goals
+
+Do SBC on normal MLE
+Plan out API 
+Figure out why MLE doesn't work for t-dist / exponential
+Draft blog post with Normal MLE with SBC
+
+Progress
+
+t-dist and exponential MLE don't return correct inference even if we fix loc, scale, df parameters (only infer delta)
+The t-dist inference is good when nu is higher (as nu gets larger, t- becomes more normal)
+
+
+
