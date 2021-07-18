@@ -1,19 +1,18 @@
-Goals
+# Goals
 
 Do SBC on normal MLE
 Plan out API 
 Figure out why MLE doesn't work for t-dist / exponential
 Draft blog post with Normal MLE with SBC
-Look at Gaussianize, where is mean/var coming from for cauchy 1
-Figure out examples of LambertW x Exp
+Look at LambertW::Gaussianize, where is mean/var coming from for cauchy 1
+Figure out use-cases for LambertW x Exp (Exponential-ize Weibull?)
 
-Progress
+# Progress
 
 t-dist and exponential MLE don't return correct inference even if we fix loc, scale, df parameters (only infer delta)
 The t-dist inference is good when nu is higher (as nu gets larger, t- becomes more normal).
 
 Exponential distribution seems to struggle as well, possible due to x negative or close to 0.
-
 
 https://mc-stan.org/docs/2_23/stan-users-guide/sbc-in-stan.html
 https://mc-stan.org/rstan/reference/sbc.html
@@ -21,5 +20,23 @@ https://arxiv.org/abs/1804.06788
 https://github.com/hyunjimoon/SBC
 https://discourse.mc-stan.org/t/sbc-stanconnect-2021/21798/10?u=spinkney
 
+## Summary of SBC
 
+I wrote two Stan programs, one that infers delta (heavy-tailed parameter) given fixed mu/sigma and another that infers
+(delta, mu, sigma) simultaneously. 
 
+The priors are delta ~ Exp(1), mu ~ normal(0, 1) and, sigma ~ invgamma(10, 10).
+
+I ran the SBC as follows, for each Stan program
+1. Generate (delta, mu, sigma) from priors
+2. Each prior draw creates a single SBC iteration
+For each SBC iteration,
+3. Generate symmetric heavy-tailed samples (type h) using the R package
+4. Run the Stan sampler, which generates 4000 samples from posterior (4 chains x 1000 iter_sampling)
+5. Compare the prior draw vs. the 4000 posterior samples per parameter
+At the end of all SBC iterations
+6. Make a histogram of prior rank
+7. Store these as images in gsoc/week28/results
+
+sbc_delta_joint, sbc_mu_joint, sbc_sigma_joint are SBC ranks from the Stan program estimating (delta, mu, sigma)
+sbc_delta is the SBC rank from the Stan program from estimating delta only

@@ -18,16 +18,18 @@ functions {
 data {
   int N;
   vector[N] y;
-  real mu;
-  real<lower=0> sigma;
 }
 parameters {
   real<lower=0> delta;
+  real mu;
+  real<lower=0> sigma;
 }
 model {
   vector[N] x = lambertw_delta_lp(y, delta, mu, sigma) * sigma + mu;
 
   delta ~ exponential(1);
+  mu ~ normal(0, 1);
+  sigma ~ inv_gamma(10, 10);
 
   x ~ normal(mu, sigma);
 }

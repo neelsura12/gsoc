@@ -1,5 +1,5 @@
 library(cmdstanr)
-fp <- file.path("/Users/nshah/work/gsoc/models/lamw_normal.stan")
+fp <- file.path("/Users/nshah/work/gsoc/models/lamw_normal_joint.stan")
 mod <- cmdstan_model(fp, force_recompile=T)
 
 # tmp ---------------------------------------------------------------------
@@ -14,10 +14,7 @@ x_hat=(x - mu)/sigma
 y <- x_hat * exp(delta/2*x_hat^2)*sigma + mu;
 
 mod_out <- mod$sample(
-    data=list(N=N,
-                y=yy,
-                mu=mu,
-                sigma=sigma),
+    data=list(N=N, y=y),
     chains=2,
     init=5,
     adapt_delta=0.8,
@@ -30,5 +27,4 @@ mod_out$summary()
 
 # ------------------
 
-yy=LambertW::rLambertW(N, distname="normal",
-                         theta=list(beta=c(mu, sigma), delta=delta))
+yy=LambertW::rLambertW(N, beta=c(mu, sigma), delta=delta, distname="normal")
