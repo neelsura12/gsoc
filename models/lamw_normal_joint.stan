@@ -12,7 +12,7 @@ functions {
         real y_sq = square(y_hat[n]);
         real x_cache = lambert_w0(delta * y_sq);
         x[n] = signum(y_hat[n]) * sqrt(x_cache / delta);
-        target += 0.5 * (log(x_cache) - log(delta)) - log(fabs(y_hat[n])) - log1p( x_cache );
+        target += 0.5 * (log(x_cache) - log(delta)) - log(fabs(y_hat[n])) - log1p(x_cache);
     }
     return x * sigma + mu;
   }
@@ -31,7 +31,7 @@ model {
   vector[N] x = lambertw_delta_lp(y, delta, mu, sigma);
   delta ~ exponential(1);
   mu ~ std_normal();
-  sigma ~ inv_gamma(2, 0.1);
+  sigma ~ gamma(2, 0.1);
   
   x ~ normal(mu, sigma);
 }

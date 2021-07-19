@@ -1,5 +1,4 @@
 library(cmdstanr)
-set_cmdstan_path("/Users/pinkney/.cmdstanr/cmdstan-2.27.0")
 library(posterior)
 library(invgamma)
 library(LambertW)
@@ -7,17 +6,17 @@ library(LambertW)
 c_dark <- c("#8F2727")
 c_dark_highlight <- c("#7C0000")
 
-fp <- file.path("~../lamw_normal_joint.stan")
-fit_model <- cmdstan_model(fp, force_recompile=F)
+fp <- file.path("/Users/nshah/work/gsoc/models/lamw_normal_joint.stan")
+fit_model <- cmdstan_model(fp, force_recompile=TRUE)
 
 # -----------------------------------
 N <- 100  # num observations
 R <- 1000 # num draws from joint
-S <- 100  # num SBC iters
+S <- 500  # num SBC iters
 
-prior_mu <- rnorm(N, 0, 1)
-prior_sigma <- rinvgamma(N, shape=2, scale=.1)
-prior_delta <- rexp(N, rate=1)
+prior_mu <- rnorm(S, 0, 1)
+prior_sigma <- rgamma(S, shape=2, scale=.1)
+prior_delta <- rexp(S, rate=1)
 
 sbc_rank_delta=c()
 sbc_rank_mu=c()
@@ -30,9 +29,9 @@ for (i in 1:S) {
   mod_out <- fit_model$sample(data=list(N=N,
                                         y=y_simu),
                               iter_sampling=R,
-                              parallel_chains = 4,
-                              show_messages = F,
-                              adapt_delta = 0.8,
+                              parallel_chains=4,
+                              show_messages=F,
+                              adapt_delta=0.8,
                               iter_warmup=R,
                               refresh=0)
   posterior_samples <- as_draws_df(mod_out$draws())
@@ -40,6 +39,9 @@ for (i in 1:S) {
   sbc_rank_delta=c(sbc_rank_delta, sum(prior_delta[i] < posterior_samples$delta))
   sbc_rank_mu=c(sbc_rank_mu, sum(prior_mu[i] < posterior_samples$mu))
   sbc_rank_sigma=c(sbc_rank_sigma, sum(prior_sigma[i] < posterior_samples$sigma))
+  if (i %% 100 == 0) {
+  	cat("Res:", i, "\n")
+  }
 }
 
 # ------------------------------------------------------------------------------

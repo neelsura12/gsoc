@@ -3,7 +3,8 @@
 Do SBC on normal MLE
 Plan out API 
 Figure out why MLE doesn't work for t-dist / exponential
-Draft blog post with Normal MLE with SBC
+Draft blog post with Normal MLE with SBC 
+Compare math against what's being implemented
 Look at LambertW::Gaussianize, where is mean/var coming from for cauchy 1
 Figure out use-cases for LambertW x Exp (Exponential-ize Weibull?)
 
@@ -40,3 +41,10 @@ At the end of all SBC iterations
 
 sbc_delta_joint, sbc_mu_joint, sbc_sigma_joint are SBC ranks from the Stan program estimating (delta, mu, sigma)
 sbc_delta is the SBC rank from the Stan program from estimating delta only
+
+## Parallel
+
+Future package
+multisession mode
+set seed before everything else
+Random number generation
