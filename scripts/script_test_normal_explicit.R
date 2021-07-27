@@ -1,5 +1,5 @@
 library(cmdstanr)
-fp <- file.path("/Users/nshah/work/gsoc/models/lamw_normal_explicit.stan")
+fp <- file.path("/Users/nshah/Documents/GitHub/scratch/models/lamw_normal_explicit.stan")
 mod <- cmdstan_model(fp, force_recompile=T)
 
 # tmp ---------------------------------------------------------------------

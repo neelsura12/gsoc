@@ -8,12 +8,13 @@ parameters {
     real<lower=0> sigma;
 }
 model {
+    vector[N] z = (y - mu) / sigma;
+    vector[N] w_delta_z_sq = lambert_w0(delta * square(z));
+    
     delta ~ exponential(1);
     mu ~ normal(0, 1);
     sigma ~ normal(0, sqrt(pi()/2));
-    vector[N] z = (y - mean(y)) / sd(y);
-    vector[N] w_delta_z_sq = lambert_w0(delta * square(z));
-    target += -N * log(sigma);
-    target += -1/2 * (1 + 1/delta) * w_delta_z_sq;
-    target += -log(1 + w_delta_z_sq);
+    
+    target += -N * log(sigma) - 0.5 * square(z)' * exp(-w_delta_z_sq);
+    target += 0.5 * log(w_delta_z_sq) - 0.5 * log(delta) - log(fabs(z)) -log1p(w_delta_z_sq);
 }
