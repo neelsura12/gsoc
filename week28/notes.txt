@@ -1,12 +1,10 @@
 # Goals
 
+Done -
 Do SBC on normal MLE
-Plan out API 
 Figure out why MLE doesn't work for t-dist / exponential
-Draft blog post with Normal MLE with SBC 
 Compare math against what's being implemented
 Look at LambertW::Gaussianize, where is mean/var coming from for cauchy 1
-Figure out use-cases for LambertW x Exp (Exponential-ize Weibull?)
 
 # Progress
 
