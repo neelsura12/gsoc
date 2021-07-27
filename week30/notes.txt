@@ -13,11 +13,12 @@ Figure out use-cases for LambertW x Exp (Exponential-ize Weibull? see below)
   - Support the different modes (Delta_l, Delta_r)
 - Gaussianize, x is in the model block, is it generated quantities 
 - Tweedie distribution (check the forums)
-  - Power is hard to estimate without 
+  - Power is hard to estimate 
   - 1 < p < 2
 - Neel to send design document
 - Lambert_exponential_transform,untransform
-- Offset multiplier for center/rescaling (https://discourse.mc-stan.org/t/updated-non-centered-parametrization-with-offset-and-multiplier/13601)
-- Adding constraints, Stan samples from unconstrained space, new functionality that will require _constrain, _free function, need to make a bijection
-- Would do backend 
-- Lemma A.2 (supplement) vs. g_Y(y | beta, \delta)
+- Offset multiplier for center/rescaling 
+  - https://discourse.mc-stan.org/t/updated-non-centered-parametrization-with-offset-and-multiplier/13601
+- Adding constraints, Stan samples from unconstrained space, new functionality that will require _constrain, _free function, need to make a bijection, would do backend this way. Add jacobian keyword this way.
+  - https://discourse.mc-stan.org/t/composable-transforms-in-stan/23484/1
+- Jacobian adjustemnt - Lemma A.2 (supplement) vs. g_Y(y | beta, \delta)
