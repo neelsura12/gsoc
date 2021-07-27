@@ -7,7 +7,7 @@ mod <- cmdstan_model(fp, force_recompile=T)
 N <- 1000
 mu <- 0
 sigma <- 1
-delta <- 1
+delta <- 0
 
 y = LambertW::rLambertW(N, theta=list(beta=c(mu, sigma), delta=delta, alpha=1), distname="normal")
 
