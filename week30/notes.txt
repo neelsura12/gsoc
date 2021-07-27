@@ -1,7 +1,23 @@
 # Goals
 
-Plan out API 
+Plan out API (design doc)
 Draft blog post with Normal/Exponential with SBC 
-Figure out use-cases for LambertW x Exp (Exponential-ize Weibull?)
+Figure out use-cases for LambertW x Exp (Exponential-ize Weibull? see below)
 
 # Progress
+
+# Meeting notes 
+
+- Student-t nu/delta both heavy-tailed parameters, can't be identified
+- Exponential/Normal, how does Gaussianize
+  - Support the different modes (Delta_l, Delta_r)
+- Gaussianize, x is in the model block, is it generated quantities 
+- Tweedie distribution (check the forums)
+  - Power is hard to estimate without 
+  - 1 < p < 2
+- Neel to send design document
+- Lambert_exponential_transform,untransform
+- Offset multiplier for center/rescaling (https://discourse.mc-stan.org/t/updated-non-centered-parametrization-with-offset-and-multiplier/13601)
+- Adding constraints, Stan samples from unconstrained space, new functionality that will require _constrain, _free function, need to make a bijection
+- Would do backend 
+- Lemma A.2 (supplement) vs. g_Y(y | beta, \delta)
