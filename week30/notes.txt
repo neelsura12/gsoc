@@ -6,6 +6,10 @@ Figure out use-cases for LambertW x Exp (Exponential-ize Weibull? see below)
 
 # Progress
 
+Debugging Gaussianize to plan the API
+- devtools::load_all(path="~/work/gsoc/lambertW/R")
+- https://support.rstudio.com/hc/en-us/articles/205612627-Debugging-with-the-RStudio-IDE
+
 # Meeting notes 
 
 - Student-t nu/delta both heavy-tailed parameters, can't be identified
