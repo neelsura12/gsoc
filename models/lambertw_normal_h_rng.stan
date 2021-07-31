@@ -1,7 +1,7 @@
 data {
     real mu; // offset
     real<lower=0> sigma; // multiplier
-    real<lower=0> delta; // symmetric-tail index
+    real<lower=0> delta; // symmetric-tail parameter
 }
 generated quantities {
     real x = normal_rng(mu, sigma);
