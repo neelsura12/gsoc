@@ -1,0 +1,4 @@
+Meeting notes
+- Complete blog post
+- Compare/contrast against robust regression
+- Make lpdf version of normal_hh function
