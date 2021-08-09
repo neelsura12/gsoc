@@ -8,3 +8,5 @@ LambertW/
 .DS_Store/
 models/lambertw_exponential_s_transform
 models/lambertw_normal_hh_transform
+week31/regression_w_normal_error
+week31/regression_w_non_linear_error
