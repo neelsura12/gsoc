@@ -8,7 +8,7 @@ x <- rpois(N, lambda=lambda)
 mu <- b*x + a
 sd <- 1.5
 nu <- 2*sd^2/(sd^2 - 1)
-delta <- 1
+delta <- 1/3
 
 # regression with normal error
 
