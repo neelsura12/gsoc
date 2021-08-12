@@ -1,3 +1,8 @@
+library(cmdstanr)
+library(posterior)
+
+# setup -----------------------------------------------------------------------
+
 N <- 1000
 
 lambda <- 3
@@ -36,6 +41,18 @@ e4 <- error4(sigma)
 e <- c(e1, e2, e3, e4)
 dim(e) <- c(N, 4)
 
+# fit stan program ------------------------------------------------------------
+
+fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_h.stan", sep=""))
+mod <- cmdstan_model(fp, force_recompile = F)
+
+i <- 3
+y <- alpha + beta*x + e[,i]
+
+mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
+mod_out$summary()
+
+# make plots ------------------------------------------------------------------
 # error histograms
 
 par(mfrow = c(2, 2))
@@ -64,20 +81,6 @@ for (i in 1:4) {
     mtext(i, side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
     box(col = "grey60")
 }
-
-# fit stan program
-
-library(cmdstanr)
-library(posterior)
-
-fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_h.stan", sep=""))
-mod <- cmdstan_model(fp, force_recompile = F)
-
-i <- 3
-y <- alpha + beta*x + e[,i]
-
-mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-print(mod_out$summary()[1:5,])
 
 # compare generated samples against originals
 

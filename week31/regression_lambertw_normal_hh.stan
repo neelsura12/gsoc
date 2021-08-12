@@ -14,11 +14,12 @@ transformed parameters {
     vector[N] mu = alpha + beta * x;
 }
 model {
+    
     alpha ~ normal(0.5, 1);
     beta ~ normal(3, 1);
-    sigma ~ normal(0, sqrt(pi()/2));
-    delta_left ~ exponential(1);
-    delta_right ~ exponential(1);   
+    sigma ~ normal(0, 1.5*sqrt(pi()/2));
+    delta_left ~ exponential(3);
+    delta_right ~ exponential(3);   
     
     real z, w_delta_z_sq;
     for (i in 1:N) {
