@@ -70,7 +70,20 @@ for (i in 1:4) {
 library(cmdstanr)
 library(posterior)
 
-fp <- file.path(paste(getwd(), "/week31/regression_w_non_linear_error.stan", sep=""))
+fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_h.stan", sep=""))
+mod <- cmdstan_model(fp, force_recompile = F)
+
+for (i in 1:4)
+{
+    y <- b*x + a + e[,i]
+    
+    mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
+    print(mod_out$summary()[1:5,])
+}
+
+#
+
+fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_hh.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
 for (i in 1:4)
