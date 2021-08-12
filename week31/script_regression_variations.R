@@ -1,8 +1,8 @@
 N <- 1000
 
 lambda <- 3
-b <- 3
-a <- 1
+alpha <- 1
+beta <- 3
 x <- rpois(N, lambda=lambda)
 
 mu <- b*x + a
@@ -73,26 +73,11 @@ library(posterior)
 fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_h.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
-for (i in 1:4)
-{
-    y <- b*x + a + e[,i]
-    
-    mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-    print(mod_out$summary()[1:5,])
-}
+i <- 3
+y <- alpha + beta*x + e[,i]
 
-#
-
-fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_hh.stan", sep=""))
-mod <- cmdstan_model(fp, force_recompile = F)
-
-for (i in 1:4)
-{
-    y <- b*x + a + e[,i]
-    
-    mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-    print(mod_out$summary()[1:6,])
-}
+mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
+print(mod_out$summary()[1:5,])
 
 # compare generated samples against originals
 

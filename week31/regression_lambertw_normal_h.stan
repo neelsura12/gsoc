@@ -16,10 +16,10 @@ model {
     vector[N] z = (y - mu) / sigma;
     vector[N] w_delta_z_sq = lambert_w0(delta * square(z));
     
-    alpha ~ normal(0.5, 1);
+    alpha ~ normal(1, 1);
     beta ~ normal(3, 1);
-    sigma ~ normal(0, sqrt(pi()/2));
-    delta ~ exponential(1);
+    sigma ~ normal(0, 3/2*sqrt(pi()/2));
+    delta ~ normal(1/3, 1);
 
     target += -N * log(sigma) - 0.5 * square(z)' * exp(-w_delta_z_sq);
     target += 0.5 * log(w_delta_z_sq) - 0.5 * log(delta) - log(fabs(z)) - log1p(w_delta_z_sq);
