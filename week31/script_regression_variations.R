@@ -1,57 +1,87 @@
-library(cmdstanr)
-
 N <- 1000
+
 lambda <- 3
 b <- 3
-a <- 0.5
+a <- 1
 x <- rpois(N, lambda=lambda)
+
 mu <- b*x + a
-sd <- 1.5
-nu <- 2*sd^2/(sd^2 - 1)
-delta <- 1/3
+sigma <- 3/2
 
-# regression with normal error
+error1 <- function(sigma) {
+    rnorm(N, 0, sigma)
+}
 
-y <- mu + rnorm(N, mu, sd)
+error2 <- function(sigma) {
+    nu <- 2*sigma^2/(sigma^2 - 1)
+    rt(N, nu)
+}
 
-qqnorm(y - mu, pch = 1, frame = FALSE, main="QQ plot: norm errors")
-qqline(y - mu, col = "steelblue", lwd = 2)
+error3 <- function(sigma, delta=1/3) {
+    u <- rnorm(N)
+    u*exp(delta/2*u^2)*sigma
+}
 
-fp <- file.path("/Users/nshah/Documents/GitHub/scratch/week31/regression_w_normal_error.stan")
+error4 <- function(sigma) {
+    e1 <- rnorm(N, 0, sigma)
+    nu <- 2*sigma^2/(sigma^2 - 1)
+    e2 <- rt(N, nu)
+    ifelse(e1 >= 0, e1, -abs(e2))
+}
+
+e1 <- error1(sigma)
+e2 <- error2(sigma)
+e3 <- error3(sigma)
+e4 <- error4(sigma)
+e <- c(e1, e2, e3, e4)
+dim(e) <- c(N, 4)
+
+# error histograms
+
+par(mfrow = c(2, 2))
+par(cex = 0.6)
+par(mar = c(0, 0, 0, 0), oma = c(4, 4, 0.5, 0.5))
+par(tcl = -0.25)
+par(mgp = c(2, 0.6, 0))
+for (i in 1:4) {
+    hist(e[,i], axes = T, freq = F, main=c(), yaxt="n")
+    padj <- ifelse(i %in% c(3, 4), 1.5, 1)
+    mtext(i, side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
+    box(col = "grey60")
+}
+
+# error qqplots
+
+par(mfrow = c(2, 2))
+par(cex = 0.6)
+par(mar = c(0, 0, 0, 0), oma = c(4, 4, 0.5, 0.5))
+par(tcl = -0.25)
+par(mgp = c(2, 0.6, 0))
+for (i in 1:4) {
+    qqnorm(e[,i], pch = 1, frame = FALSE, main=c())
+    qqline(e[,i], col = "steelblue", lwd = 2)
+    padj <- ifelse(i %in% c(3, 4), 1.5, 1)
+    mtext(i, side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
+    box(col = "grey60")
+}
+
+# fit stan program
+
+library(cmdstanr)
+library(posterior)
+
+fp <- file.path(paste(getwd(), "/week31/regression_w_non_linear_error.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
-mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-mod_out$summary()
+for (i in 1:4)
+{
+    y <- b*x + a + e[,i]
+    
+    mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
+    print(mod_out$summary()[1:6,])
+}
 
-# regression with t error
-
-y <- mu + rt(N, nu)
-
-qqnorm(y - mu, pch=1, frame=FALSE, ylim=c(-6,6), xlim=c(-3,3), main="QQ plot: t-dist errors")
-qqline(y - mu, col="steelblue", lwd=2)
-
-fp <- file.path("/Users/nshah/Documents/GitHub/scratch/week31/regression_w_t_error.stan")
-mod <- cmdstan_model(fp, force_recompile = F)
-
-mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-mod_out$summary()
-
-# regression with non-linear transform
-
-x <- mu + rnorm(N)
-x_hat <- (x - mu) / sigma
-y <-x_hat * exp(delta/2*x_hat^2)*sigma + mu
-
-qqnorm(y - mu, pch=1, frame=FALSE, ylim=c(-6,6), xlim=c(-3,3), main="QQ plot: non-linear transform")
-qqline(y - mu, col="steelblue", lwd=2)
-
-fp <- file.path("/Users/nshah/Documents/GitHub/scratch/week31/regression_w_non_linear_error.stan")
-mod <- cmdstan_model(fp, force_recompile = F)
-
-mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-mod_out$summary()
-
-# works on all 
+# compare generated samples against originals
 
 quantile(as_draws_df(mod_out$draws())$new_y, c(0.05,0.25,0.5,0.75,0.95))
 quantile(y, c(0.05,0.25,0.5,0.75,0.95))
