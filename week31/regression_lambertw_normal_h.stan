@@ -18,7 +18,7 @@ model {
     
     alpha ~ normal(1, 1);
     beta ~ normal(3, 1);
-    sigma ~ normal(0, 3/2*sqrt(pi()/2));
+    sigma ~ normal(0, 1.5*sqrt(pi()/2));
     delta ~ exponential(3);
 
     target += -N * log(sigma) - 0.5 * square(z)' * exp(-w_delta_z_sq);

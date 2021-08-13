@@ -10,7 +10,7 @@ alpha <- 1
 beta <- 3
 x <- rpois(N, lambda=lambda)
 
-mu <- b*x + a
+mu <- beta*x + a
 sigma <- 3/2
 
 error1 <- function(sigma) {
@@ -43,14 +43,15 @@ dim(e) <- c(N, 4)
 
 # fit stan program ------------------------------------------------------------
 
-fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_h.stan", sep=""))
+fp <- file.path(paste(getwd(), "/week31/regression_lambertw_normal_hh.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
-i <- 3
-y <- alpha + beta*x + e[,i]
-
-mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
-mod_out$summary()
+for (i in 1:4) {
+    y <- alpha + beta*x + e[,i]
+    
+    mod_out <- mod$sample(data=list(N=N, y=y, x=x), parallel_chains=4)
+    print(mod_out$summary()[1:6,])
+}
 
 # make plots ------------------------------------------------------------------
 # error histograms
