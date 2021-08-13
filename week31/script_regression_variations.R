@@ -1,5 +1,6 @@
 library(cmdstanr)
 library(posterior)
+library(LambertW)
 
 # setup -----------------------------------------------------------------------
 
@@ -82,6 +83,19 @@ for (i in 1:4) {
     mtext(i, side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
     box(col = "grey60")
 }
+
+# LambertW
+
+par(mfrow = c(1, 2))
+par(cex = 0.6)
+par(mar = c(0, 0, 0, 0), oma = c(4, 4, 0.5, 0.5))
+par(tcl = -0.25)
+par(mgp = c(2, 0.6, 0))
+
+hist(rnorm(N, 0, 1), main=c())
+lamw <- rLambertW(N, "normal", theta=list(beta=c(0,1), delta=c(0,1/3), gamma=0, alpha=1))
+hist(lamw, main=c())
+
 
 # compare generated samples against originals
 
