@@ -84,7 +84,7 @@ for (i in 1:4) {
     box(col = "grey60")
 }
 
-# LambertW
+# LambertW  ------------------------------------------------------------------
 
 par(mfrow = c(1, 2))
 par(cex = 0.6)
@@ -96,8 +96,7 @@ hist(rnorm(N, 0, 1), main=c())
 lamw <- rLambertW(N, "normal", theta=list(beta=c(0,1), delta=c(0,1/3), gamma=0, alpha=1))
 hist(lamw, main=c())
 
-
-# compare generated samples against originals
+# Generated samples  ----------------------------------------------------------
 
 quantile(as_draws_df(mod_out$draws())$new_y, c(0.05,0.25,0.5,0.75,0.95))
 quantile(y, c(0.05,0.25,0.5,0.75,0.95))
