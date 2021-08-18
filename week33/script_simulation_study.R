@@ -6,11 +6,9 @@ library(LambertW)
 
 lamw_error <- function(N, sigma, delta_left, delta_right) {
     u <- rnorm(N)
-    ifelse(u <= 0, 
-           u*exp(delta_left/2*u^2)*sigma, 
-           u*exp(delta_right/2*u^2)*sigma)
+    ifelse(u <= 0, u*exp(delta_left/2*u^2)*sigma, 
+                   u*exp(delta_right/2*u^2)*sigma)
 }
-
 
 N <- 1000
 
@@ -32,9 +30,10 @@ dim(y) <- c(N, 2)
 fp <- file.path(paste(getwd(), "/week33/regression_lambertw_normal_hh.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
+mod_out = c()
 for (i in 1:2) {
-    mod_out <- mod$sample(data=list(N=N, y=y[,i], x=x), parallel_chains=4)
-    print(mod_out$summary()[1:6,])
+    tmp <- mod$sample(data=list(N=N, y=y[,i], x=x), parallel_chains=4)
+    mod_out <- c(mod_out, tmp)
 }
 
 # make plots ------------------------------------------------------------------
