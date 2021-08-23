@@ -64,18 +64,29 @@ c_dark <- c("#8F2727")
 c_dark_highlight <- c("#7C0000")
 
 y_new <- as_draws_df(mod_out$draws('y_new'))$y_new
-
 min_y = as.integer(min(y1, y_new) - 1)
 max_y = as.integer(max(y1, y_new) + 2)
-obs_counts <- hist(y1, breaks=(min_y:max_y)-0.5, plot=FALSE)$counts
-B <- length(obs_counts) - 1
+my_breaks = min_y:max_y # 68
 
-idx <- rep(0:B, each=2)
-x <- sapply(1:length(idx), function(b) if(b %% 2 == 0) idx[b] + 0.5 else idx[b] - 0.5)
-x <- x - min_y
+# input data
+obs_counts <- hist(y1, breaks=my_breaks, plot=FALSE)$counts # NOTE: hardcoded y1
+B <- length(obs_counts) - 1 # 67
+
+idx <- rep(0:B, each=2) # 134
 pad_obs <- do.call(cbind, lapply(idx, function(n) obs_counts[n + 1]))
 
-counts <- sapply(1:4000, function(n) hist(y_new, breaks=(min_y:max_y)-0.5, plot=FALSE)$counts)
+my_x = rep(my_breaks, each=2)
+x = c()
+for (b in 1:length(idx)) {
+    if (idx[b] %% 2 == 0) {
+        x <- c(x, my_x[b] + 0.5)
+    } else {
+        x <- c(x, my_x[b] - 0.5)
+    }
+}
+
+# posterior samples
+counts <- sapply(1:4000, function(n) hist(y_new, breaks=my_breaks, plot=FALSE)$counts)
 probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 cred <- sapply(1:(B + 1), function(b) quantile(counts[b,], probs=probs))
 pad_cred <- do.call(cbind, lapply(idx, function(n) cred[1:9,n + 1]))

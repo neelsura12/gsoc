@@ -36,8 +36,8 @@ model {
     }
 }
 generated quantities {
-    real x_new = normal_rng(3, 1);
-    real mu_new = x_new * beta + alpha;
+    real x_new = normal_rng(1, 1);
+    real mu_new = alpha + beta * x_new;
     real u = normal_rng(0, 1);
     real delta = u <= 0 ? delta_left : delta_right;
     real y_new = u * exp(delta/2 * square(u))*sigma + mu_new;
