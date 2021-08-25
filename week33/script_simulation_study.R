@@ -26,7 +26,7 @@ dim(y) <- c(N, 2)
 fp <- file.path(paste(getwd(), "/week33/regression_lambertw_normal_hh.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
-for (i in 1:1) {
+for (i in 2:2) {
     mod_out <- mod$sample(data=list(N=N, y=y[,i], x=x), parallel_chains=4)
     print(xtable(mod_out$summary()[2:6,], type = "latex"), file=paste(getwd(), "/y", i, ".tex", sep=""))
 }
@@ -63,44 +63,48 @@ c_mid_highlight <- c("#A25050")
 c_dark <- c("#8F2727")
 c_dark_highlight <- c("#7C0000")
 
-y_new <- as_draws_df(mod_out$draws('y_new'))$y_new
-min_y = as.integer(min(y1, y_new) - 1)
-max_y = as.integer(max(y1, y_new) + 2)
-my_breaks = min_y:max_y # 68
-
 # input data
-obs_counts <- hist(y1, breaks=my_breaks, plot=FALSE)$counts # NOTE: hardcoded y1
-B <- length(obs_counts) - 1 # 67
+y_obs <- y2
 
-idx <- rep(0:B, each=2) # 134
+y_new <- as_draws_df(mod_out$draws('y_new'))[,1:N]
+y_min = as.integer(min(y_obs, min(y_new)) - 1)
+y_max = as.integer(max(y_obs, max(y_new)) + 2)
+my_breaks = y_min:y_max # e.g. 68
+
+obs_counts <- hist(y_obs, breaks=my_breaks, plot=FALSE)$counts
+B <- length(obs_counts) - 1 # e.g. 67
+
+idx <- rep(0:B, each=2) # e.g. 67*2 =  134
 pad_obs <- do.call(cbind, lapply(idx, function(n) obs_counts[n + 1]))
 
 my_x = rep(my_breaks, each=2)
-x = c()
-for (b in 1:length(idx)) {
-    if (idx[b] %% 2 == 0) {
-        x <- c(x, my_x[b] + 0.5)
-    } else {
-        x <- c(x, my_x[b] - 0.5)
-    }
+x_plot = c()
+for (b in seq(1, length(idx)/2)) {
+    x_plot <- c(x_plot, my_x[1+2*(b-1)] - 0.5, my_x[2*(b-1)+2] + 0.5)
 }
 
 # posterior samples
-counts <- sapply(1:4000, function(n) hist(y_new, breaks=my_breaks, plot=FALSE)$counts)
+counts <- sapply(1:4000, function(n) hist(as.numeric(y_new[n,]), breaks=my_breaks, plot=FALSE)$counts)
 probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 cred <- sapply(1:(B + 1), function(b) quantile(counts[b,], probs=probs))
 pad_cred <- do.call(cbind, lapply(idx, function(n) cred[1:9,n + 1]))
 
-plot(1, type="n", main="Posterior Retrodictive Check", xlim=c(-6, 32), xlab="y", ylim=c(0, max(c(obs_counts, cred[9,]))), ylab="")
+par(mfrow = c(1, 1),
+    cex = 0.6,
+    mar = c(0, 0, 0, 0), 
+    oma = c(3, 2, 0.5, 0.5),
+    tcl = -0.25,
+    mgp = c(2, 0.6, 0))
+plot(1, type="n", xlim=c(-20,20), ylim=c(0, max(c(obs_counts, cred[9,]))), xlab="", ylab="")
 
-polygon(c(x, rev(x)), c(pad_cred[1,], rev(pad_cred[9,])), col = c_light, border = NA)
-polygon(c(x, rev(x)), c(pad_cred[2,], rev(pad_cred[8,])), col = c_light_highlight, border = NA)
-polygon(c(x, rev(x)), c(pad_cred[3,], rev(pad_cred[7,])), col = c_mid, border = NA)
-polygon(c(x, rev(x)), c(pad_cred[4,], rev(pad_cred[6,])), col = c_mid_highlight, border = NA)
-lines(x, pad_cred[5,], col=c_dark, lwd=2)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[1,], rev(pad_cred[9,])), col = c_light, border = NA)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[2,], rev(pad_cred[8,])), col = c_light_highlight, border = NA)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[3,], rev(pad_cred[7,])), col = c_mid, border = NA)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[4,], rev(pad_cred[6,])), col = c_mid_highlight, border = NA)
+lines(x_plot, pad_cred[5,], col=c_dark, lwd=2)
 
-lines(x, pad_obs, col="white", lty=1, lw=2.5)
-lines(x, pad_obs, col="black", lty=1, lw=2)
+lines(x_plot, pad_obs, col="white", lty=1, lw=2.5)
+lines(x_plot, pad_obs, col="black", lty=1, lw=2)
 
 # Bijective transform  --------------------------------------------------------
 
