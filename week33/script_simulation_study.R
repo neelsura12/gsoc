@@ -1,27 +1,23 @@
 library(cmdstanr)
 library(posterior)
 library(LambertW)
+library(xtable)
 
 # setup -----------------------------------------------------------------------
 
-lamw_error <- function(N, sigma, delta_left, delta_right) {
+epsilon <- function(N, sigma, delta_left, delta_right) {
     u <- rnorm(N)
-    ifelse(u <= 0, u*exp(delta_left/2*u^2)*sigma, 
-                   u*exp(delta_right/2*u^2)*sigma)
+    ifelse(u <= 0, 
+           u*exp(delta_left/2*u^2)*sigma, 
+           u*exp(delta_right/2*u^2)*sigma)
 }
 
-N <- 1000
+N <- 1000; mu_x <- 1; alpha <- 1; beta <- 3; sigma <- 3/2
 
-mu_x <- 3
 x <- rnorm(N, mu_x, 1)
 
-alpha <- 1
-beta <- 3
-sigma <- 3/2
-
-y1 <- alpha + beta*x + lamw_error(N, sigma, 0, 1/3)
-y2 <- alpha + beta*x + lamw_error(N, sigma, 2/3, 1/3)
-
+y1 <- alpha + beta*x + epsilon(N, sigma, 0, 1/3)
+y2 <- alpha + beta*x + epsilon(N, sigma, 2/3, 1/3)
 y <- c(y1, y2)
 dim(y) <- c(N, 2)
 
@@ -30,53 +26,85 @@ dim(y) <- c(N, 2)
 fp <- file.path(paste(getwd(), "/week33/regression_lambertw_normal_hh.stan", sep=""))
 mod <- cmdstan_model(fp, force_recompile = F)
 
-mod_out = c()
-for (i in 1:2) {
-    tmp <- mod$sample(data=list(N=N, y=y[,i], x=x), parallel_chains=4)
-    mod_out <- c(mod_out, tmp)
+for (i in 2:2) {
+    mod_out <- mod$sample(data=list(N=N, y=y[,i], x=x), parallel_chains=4)
+    print(xtable(mod_out$summary()[2:6,], type = "latex"), file=paste(getwd(), "/y", i, ".tex", sep=""))
 }
 
-# make plots ------------------------------------------------------------------
+# Plot distribution of y ------------------------------------------------------
+
 # error histograms
-
-par(mfrow = c(2, 2))
-par(cex = 0.6)
-par(mar = c(0, 0, 0, 0), oma = c(4, 4, 0.5, 0.5))
-par(tcl = -0.25)
-par(mgp = c(2, 0.6, 0))
-for (i in 1:4) {
-    hist(e[,i], axes = T, freq = F, main=c(), yaxt="n")
+par(mfrow = c(2, 2),
+    cex = 0.6,
+    mar = c(0, 0, 0, 0), 
+    oma = c(3, 2, 0.5, 0.5),
+    tcl = -0.25,
+    mgp = c(2, 0.6, 0))
+for (i in 1:2) {
+    hist(y[,i], axes = T, freq = F, main=c(), yaxt="n")
     padj <- ifelse(i %in% c(3, 4), 1.5, 1)
-    mtext(i, side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
+    mtext(paste("Y", i, sep=""), side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
     box(col = "grey60")
 }
-
 # error qqplots
-
-par(mfrow = c(2, 2))
-par(cex = 0.6)
-par(mar = c(0, 0, 0, 0), oma = c(4, 4, 0.5, 0.5))
-par(tcl = -0.25)
-par(mgp = c(2, 0.6, 0))
-for (i in 1:4) {
-    qqnorm(e[,i], pch = 1, frame = FALSE, main=c())
-    qqline(e[,i], col = "steelblue", lwd = 2)
-    padj <- ifelse(i %in% c(3, 4), 1.5, 1)
-    mtext(i, side = 3, line = -1, adj = 0.025, padj = padj, cex = 2, col = "grey40")
+for (i in 1:2) {
+    qqnorm(y[,i], pch = 1, frame = FALSE, main=c())
+    qqline(y[,i], col = "steelblue", lwd = 2)
+    mtext(paste("Y", i, sep=""), side = 3, line = -1, adj = 0.025, padj = 1.5, cex = 2, col = "grey40")
     box(col = "grey60")
 }
 
-# LambertW  ------------------------------------------------------------------
+# Posterior retrodictive checks -----------------------------------------------
 
-par(mfrow = c(1, 2))
-par(cex = 0.6)
-par(mar = c(0, 0, 0, 0), oma = c(4, 4, 0.5, 0.5))
-par(tcl = -0.25)
-par(mgp = c(2, 0.6, 0))
+c_light <- c("#DCBCBC")
+c_light_highlight <- c("#C79999")
+c_mid <- c("#B97C7C")
+c_mid_highlight <- c("#A25050")
+c_dark <- c("#8F2727")
+c_dark_highlight <- c("#7C0000")
 
-hist(rnorm(N, 0, 1), main=c())
-lamw <- rLambertW(N, "normal", theta=list(beta=c(0,1), delta=c(0,1/3), gamma=0, alpha=1))
-hist(lamw, main=c())
+# input data
+y_obs <- y2
+
+y_new <- as_draws_df(mod_out$draws('y_new'))[,1:N]
+y_min = as.integer(min(y_obs, min(y_new)) - 1)
+y_max = as.integer(max(y_obs, max(y_new)) + 2)
+my_breaks = y_min:y_max # e.g. 68
+
+obs_counts <- hist(y_obs, breaks=my_breaks, plot=FALSE)$counts
+B <- length(obs_counts) - 1 # e.g. 67
+
+idx <- rep(0:B, each=2) # e.g. 67*2 =  134
+pad_obs <- do.call(cbind, lapply(idx, function(n) obs_counts[n + 1]))
+
+my_x = rep(my_breaks, each=2)
+x_plot = c()
+for (b in seq(1, length(idx)/2)) {
+    x_plot <- c(x_plot, my_x[1+2*(b-1)] - 0.5, my_x[2*(b-1)+2] + 0.5)
+}
+
+# posterior samples
+counts <- sapply(1:4000, function(n) hist(as.numeric(y_new[n,]), breaks=my_breaks, plot=FALSE)$counts)
+probs <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+cred <- sapply(1:(B + 1), function(b) quantile(counts[b,], probs=probs))
+pad_cred <- do.call(cbind, lapply(idx, function(n) cred[1:9,n + 1]))
+
+par(mfrow = c(1, 1),
+    cex = 0.6,
+    mar = c(0, 0, 0, 0), 
+    oma = c(3, 2, 0.5, 0.5),
+    tcl = -0.25,
+    mgp = c(2, 0.6, 0))
+plot(1, type="n", xlim=c(-20,20), ylim=c(0, max(c(obs_counts, cred[9,]))), xlab="", ylab="")
+
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[1,], rev(pad_cred[9,])), col = c_light, border = NA)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[2,], rev(pad_cred[8,])), col = c_light_highlight, border = NA)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[3,], rev(pad_cred[7,])), col = c_mid, border = NA)
+polygon(c(x_plot, rev(x_plot)), c(pad_cred[4,], rev(pad_cred[6,])), col = c_mid_highlight, border = NA)
+lines(x_plot, pad_cred[5,], col=c_dark, lwd=2)
+
+lines(x_plot, pad_obs, col="white", lty=1, lw=2.5)
+lines(x_plot, pad_obs, col="black", lty=1, lw=2)
 
 # Bijective transform  --------------------------------------------------------
 
