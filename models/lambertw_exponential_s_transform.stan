@@ -16,3 +16,7 @@ model {
     (w_gamma_z/(gamma * lambda)) ~ exponential(lambda);
     target += log(w_gamma_z) - log(gamma * z) - log1p(w_gamma_z);
 }
+generated quantities {
+    real x_pred = lambda * exponential_rng(lambda);
+    real y_pred = x_pred * exp(gamma * x_pred) / lambda;
+}
