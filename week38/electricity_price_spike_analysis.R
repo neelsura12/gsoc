@@ -62,10 +62,25 @@ mod <- cmdstan_model(fp, force_recompile = F)
 mod_out <- mod$sample(data=list(N=N, y=dat), parallel_chains=4)
 mod_out$summary()
 
+#> mod_out$summary()
+## A tibble: 5 x 10
+#  variable       mean     median         sd      mad         q5        q95  rhat ess_bulk ess_tail
+#  <chr>         <dbl>      <dbl>      <dbl>    <dbl>      <dbl>      <dbl> <dbl>    <dbl>    <dbl>
+#1 lp__     -2666.     -2666.        0.974    0.726   -2668.     -2665.      1.00    2068.    2628.
+#2 lambda       0.0329     0.0328    0.00262  0.00261     0.0289     0.0374  1.00    2334.    2604.
+#3 gamma        0.659      0.656     0.0532   0.0537      0.578      0.753   1.00    2266.    2534.
+#4 x_pred       1.02       0.695     1.06     0.715       0.0504     3.14    1.00    3692.    3826.
+#5 y_pred     294.        33.3    3118.      42.1         1.59     767.      1.00    3707.    3928.
+
 # check posterior -------------------------------------------------------------
 
 probs = c(0.05,0.25,0.75, 0.95, 0.99)
 quantile(as_draws_df(mod_out$draws())$y_pred, probs)
 quantile(dat, probs)
 
-
+#> quantile(as_draws_df(mod_out$draws())$y_pred, probs)
+#5%         25%         75%         95%         99% 
+#1.590729   10.175900  103.801250  766.611800 4507.671800 
+#> quantile(dat, probs)
+#5%      25%      75%      95%      99% 
+#11.920   13.365   65.865 1577.812 8015.968 
